@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": ["src"],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\proy_io\\Codigo\\JARs\\commons-collections4-4.1.jar",
+        "c:\\proy_io\\Codigo\\JARs\\commons-lang3-3.12.0.jar"
+    ]
+}
