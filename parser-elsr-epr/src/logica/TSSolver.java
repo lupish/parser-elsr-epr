@@ -21,7 +21,11 @@ public class TSSolver {
         }
         fileName += "_v" + params.version + "_it" + params.cantItMax;
         if (params.saltos == 1) {
-            fileName += "_saltos" + String.valueOf(params.saltosMAX);
+            if (params.saltos_swap_odd == 1) {
+                fileName += "_saltosOdd" + String.valueOf(params.saltosMAX);
+            } else {
+                fileName += "_saltos" + String.valueOf(params.saltosMAX);
+            }
         }
         fileName += "_datos_nT" + params.nT + "_nL" + params.nL +".out";
 
@@ -142,27 +146,35 @@ public class TSSolver {
         ManejadorParametros mp = new ManejadorParametros();
         Parametros params = mp.leerArchivo();
 
-        // String fileName = "OUT_v" + params.version + "_it" + params.cantItMax + "_datos_nT" + params.nT + "_nL" + params.nL +".out";
-        //String fileName = "OUT_tasas1_v" + params.version + "_it" + params.cantItMax + "_datos_nT" + params.nT + "_nL" + params.nL +".out";
-
         if (params.esMasivo == 1) {
-            if (params.version == 0) {
-                // all versions
-                int max_versions = 5;
+            if (params.all_configs == 1) {
                 PrintStream console = System.out;
-                for (int i = 1; i <= max_versions; i++) {
-                    System.out.println("RUN VERSION = " + i);
-                    ejecucionMasiva(mp, params, i);
-                    
+                for (int i = 1; i <= 10; i ++) {
+                    params.pathArchivo = params.all_configs_path + "config" + i + "\\";
+                    params.outPath = params.all_configs_path + "config" + i + "\\OUT\\";
+                    System.out.println("CONFIG = " + params.pathArchivo + " - OUT = " + params.outPath);
+
+                    ejecucionMasiva(mp, params, params.version);
+
                     // back to console
                     System.setOut(console);
                 }
-            } else {
-                //for (int i = 1; i <= 10; i++) {
-
-                //}
-
-                ejecucionMasiva(mp, params, params.version);
+            } else { 
+                if (params.version == 0) {
+                    // all versions
+                    int max_versions = 5;
+                    PrintStream console = System.out;
+                    for (int i = 1; i <= max_versions; i++) {
+                        System.out.println("RUN VERSION = " + i);
+                        ejecucionMasiva(mp, params, i);
+                        
+                        // back to console
+                        System.setOut(console);
+                    }
+                }
+                else {
+                    ejecucionMasiva(mp, params, params.version);
+                }
             }
         } else {
             System.out.println("*************************************");
@@ -537,10 +549,18 @@ public class TSSolver {
                 rNeg = "";
                 for (int i = 0; i < (params.nT-1); i++) {
                     //if (solOptima.r.charAt(i) == '0') {
-                    if (i % 2 == 0) {
-                        rNeg += '1';
+                    if (params.saltos_swap_odd == 1) {
+                        if (i % 2 != 0) {
+                            rNeg += '1';
+                        } else {
+                            rNeg += '0';
+                        }
                     } else {
-                        rNeg += '0';
+                        if (i % 2 == 0) {
+                            rNeg += '1';
+                        } else {
+                            rNeg += '0';
+                        }
                     }
                 }
                 rNeg += '1';
