@@ -41,6 +41,8 @@ public class ManejadorParametros {
             params.esMasivo = Integer.parseInt(config.getProperty("esMasivo"));
             params.outPath = config.getProperty("pathOutput");
             params.nomArchivo = config.getProperty("nomArchivo");
+            params.outPath = config.getProperty("pathOutput");
+            params.nomArchivo = config.getProperty("nomArchivo");
             params.pathArchivo = config.getProperty("pathArchivo");
             params.tasas_valor = Float.parseFloat(config.getProperty("tasas_valor"));
 
@@ -48,8 +50,11 @@ public class ManejadorParametros {
 
             params.saltos = Integer.parseInt(config.getProperty("saltos"));
             params.saltosMAX = Integer.parseInt(config.getProperty("saltos_max"));
-            
             params.v3_v2it = Integer.parseInt(config.getProperty("v3_v2it"));
+            params.saltos_swap_odd = Integer.parseInt(config.getProperty("saltos_swap_odd"));
+
+            params.all_configs = Integer.parseInt(config.getProperty("all_configs"));
+            params.all_configs_path = config.getProperty("all_configs_path");
         } catch(Exception e){
             System.out.println("Error = " + e.getMessage());
             e.printStackTrace();
