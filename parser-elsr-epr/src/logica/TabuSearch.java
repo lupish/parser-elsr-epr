@@ -645,19 +645,20 @@ public class TabuSearch {
         String rLimpio;
 
         // no swapeo primer periodo para cumplir la demanda
-        // no swapeo ultimo periodo para cumplir tasa de recoleccion, generalizo beta 1
-        for (int cV = 1; cV < (params.nT-1); cV++) { // itero por periodos
-            for (int fV = 0; fV < params.nL; fV ++) { // itero por cliente
-                vLimpio = copiaLimpiaV(v, fV, cV); // swap v[fV, cV]
-                
-                for (int cR = 0; cR < params.nT; cR++) { // itero por periodos
-                    rLimpio = copiaLimpiaR(r, cR); // swap r[cR]
-                    Object[] tupla = {vLimpio, rLimpio};
-                    vecinas.add(tupla);
+        for (int cV = 1; cV < params.nT; cV++) { // itero por periodos
+            // no swapeo penultimo periodo si beta es 1 porque es infactible por tasa de recoleccion
+            if (params.beta != 1 || (params.beta == 1 && cV != (params.nT-params.STU-1))) {
+                for (int fV = 0; fV < params.nL; fV ++) { // itero por cliente
+                    vLimpio = copiaLimpiaV(v, fV, cV); // swap v[fV, cV]
+                    
+                    for (int cR = 0; cR < params.nT; cR++) { // itero por periodos
+                        rLimpio = copiaLimpiaR(r, cR); // swap r[cR]
+                        Object[] tupla = {vLimpio, rLimpio};
+                        vecinas.add(tupla);
+                    }
                 }
             }
         }
-
 
         return vecinas;
     }
