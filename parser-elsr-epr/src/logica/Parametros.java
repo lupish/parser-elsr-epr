@@ -11,7 +11,7 @@ public class Parametros {
 
     /*** ATRIBUTOS ***/
     // params
-    public int nT, nL, M, U_0, STU, tamListaTabu, cantItMax, version, esMasivo, tasas, huL_pond, saltos, saltosMAX, v3_v2it, all_configs, saltos_swap_odd;
+    public int nT, nL, M, U_0, STU, tamListaTabu, cantItMax, version, esMasivo, tasas, huL_pond, saltos, saltosMAX, v3_v2it, all_configs, saltos_swap_odd, init_config;
     public int[] cm, cr, Km, Kr, hs, cvs, cvu;
     public int[][] D, U, Kv, hsL;
     public float[][] huL;

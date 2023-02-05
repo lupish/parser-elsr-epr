@@ -149,7 +149,8 @@ public class TSSolver {
         if (params.esMasivo == 1) {
             if (params.all_configs == 1) {
                 PrintStream console = System.out;
-                for (int i = 1; i <= 10; i ++) {
+                int init_config = params.init_config;
+                for (int i = init_config; i <= 10; i ++) {
                     params.pathArchivo = params.all_configs_path + "config" + i + "\\";
                     params.outPath = params.all_configs_path + "config" + i + "\\OUT\\";
                     System.out.println("CONFIG = " + params.pathArchivo + " - OUT = " + params.outPath);

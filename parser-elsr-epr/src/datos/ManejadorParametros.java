@@ -55,6 +55,7 @@ public class ManejadorParametros {
 
             params.all_configs = Integer.parseInt(config.getProperty("all_configs"));
             params.all_configs_path = config.getProperty("all_configs_path");
+            params.init_config = Integer.parseInt(config.getProperty("init_config"));
         } catch(Exception e){
             System.out.println("Error = " + e.getMessage());
             e.printStackTrace();
