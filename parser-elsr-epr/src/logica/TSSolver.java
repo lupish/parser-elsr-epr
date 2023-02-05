@@ -149,7 +149,8 @@ public class TSSolver {
         if (params.esMasivo == 1) {
             if (params.all_configs == 1) {
                 PrintStream console = System.out;
-                for (int i = 1; i <= 10; i ++) {
+                int init_config = params.init_config;
+                for (int i = init_config; i <= 10; i ++) {
                     params.pathArchivo = params.all_configs_path + "config" + i + "\\";
                     params.outPath = params.all_configs_path + "config" + i + "\\OUT\\";
                     System.out.println("CONFIG = " + params.pathArchivo + " - OUT = " + params.outPath);
@@ -287,10 +288,17 @@ public class TSSolver {
         ts.calcularXU_v2(solOptima);
         solOptima.xu = ts.xu;
 
+        // ts.printMatriz(solOptima.IuL, "solOptima_IuL");
+
+        // System.out.println("TESTEO");
+        // if (ts.validarTasaRecoleccion(solOptima)) {
+        //     System.out.println("importante");
+        // }
+
         if (!ts.validarTasaRecoleccion(solOptima)) {
             for (int l = 0; l < params.nL; l++) {
                 if (solOptima.xs[l][params.nT-1] == 0) {
-                    System.out.println("ACA");
+                    // System.out.println("ACA");
                     solOptima.xu[l][params.nT-1] = params.U[l][params.nT-1];
 
                     solOptima.costoViaje += params.Kv[l][params.nT-1];
@@ -304,6 +312,12 @@ public class TSSolver {
 
         solOptima.costoEntrega = costoXS + solOptima.costoTransportarU + solOptima.costoStockUL + solOptima.costoViaje;
         solOptima.costo = solOptima.costoEntrega;
+        /* System.out.println("costo entrega = " + solOptima.costoEntrega);
+        System.out.println("\tcostoXS = " + costoXS);
+        System.out.println("\tsolOptima.costoTransportarU = " + solOptima.costoTransportarU);
+        System.out.println("\tsolOptima.costoStockUL = " + solOptima.costoStockUL);
+        System.out.println("\tsolOptima.costoViaje = " + solOptima.costoViaje); */
+        
 
         // ts.printMatriz(solOptima.xs, "solInicial xs");
         // ts.printMatriz(solOptima.xu, "solInicial xu");
@@ -366,11 +380,15 @@ public class TSSolver {
             cantIt ++;
         }
 
+        // ts.printMatriz(solOptima.IuL, "\nsolOptima_IuL 2.");
+        
         double endTime = (System.currentTimeMillis() - startTime);
         if (params.version == 2) {
             ts.printSolucion(solOptima, ModoPrint.VD__POR_PLAN);
             System.out.print("\nTIEMPO (ms): " + endTime);
         }
+
+        // ts.printMatriz(solOptima.IuL, "\nsolOptima_IuL 3.");
 
         ts.validarSolucion(solOptima);
 
