@@ -31,5 +31,4 @@ public class Solucion {
     public String r;
     public String [] v;
     public String strTira;
-
 }
