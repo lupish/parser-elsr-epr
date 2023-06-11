@@ -7,6 +7,10 @@ import datos.ManejadorParametros;
 import logica.TabuSearch.ModoPrint;
 
 public class TSSolver {
+    /*****************
+        Contiene la logica de Tabu Search para TSv1, TSv2, TSv3, TSv4 y TSv5
+
+    *****************/
 
     public static void ejecucionMasiva(ManejadorParametros mp, Parametros params, int versionMasivo) throws Exception {
         String fileName = "", output = "";
@@ -143,9 +147,7 @@ public class TSSolver {
     
     public static void masterEjecucion() throws Exception {
         /*** Leer archivo DAT y configuracion ***/
-        System.out.println("to new ManejadorParametros()");
         ManejadorParametros mp = new ManejadorParametros();
-        System.out.println("to mp.leerArchivo");
         Parametros params = mp.leerArchivo();
 
         if (params.esMasivo == 1) {
@@ -192,10 +194,6 @@ public class TSSolver {
             }
             System.out.println("*************************************\n");
 
-            // sobreescribir tasas
-            // params.alpha = 1;
-            // params.beta = 1;
-
             if (params.tasas == 1) {
                 // sobreescribir tasas
                 params.alpha = params.tasas_valor;
@@ -203,23 +201,26 @@ public class TSSolver {
             }
             
             if (params.version == 1) {
+                /*** TSv1 ***/
                 System.out.println("****************************** VERSION 1 ******************************");
                 ejecucionUnitaria(params, null, null);
             }
             if (params.version == 2) {
+                /*** TSv2 ***/
                 System.out.println("****************************** VERSION 2 ******************************");
                 ejecucionUnitaria_v2(params);
             }
             if (params.version == 3) {
+                /*** TSv3: TSv2 + TSv1 ***/
                 String [] v = new String[params.nL];
                 
-                // params.cantItMax = 50;
+                // hallar sol de TSv2 como input para TSv1
                 Integer cantItV3 = params.cantItMax;
                 params.cantItMax = params.v3_v2it;
                 Solucion solMetah = ejecucionUnitaria_v2(params);
-
                 System.out.println("\nDONE v2");
 
+                // tomar matriz v de la sol de TSv2
                 for (int l = 0; l < params.nL; l++) {
                     v[l] = "";
                     for (int t = 0; t < params.nT; t++) {
@@ -231,16 +232,12 @@ public class TSSolver {
                     }
                 }
 
-                // test solver sol
-                // v[0] = "100010001001";
-                // v[1] = "100010001001";
-                // v[2] = "100010101001";
-                // solMetah.r = "000000001000";
-
+                // ejecutar TSv1
                 params.cantItMax = cantItV3;
                 ejecucionUnitaria(params, v, solMetah.r);
             }
             if (params.version == 4) {
+                /*** TSv4 ***/
                 System.out.println("****************************** VERSION 2 retornos ******************************");
                 System.out.println("tasa alpha = " + params.alpha);
                 System.out.println("tasa beta = " + params.beta);
@@ -248,13 +245,15 @@ public class TSSolver {
                 System.out.println("\nv4 ( "+ solMetah.costo + " )");
             }
             if (params.version == 5) {
-                // 
-                // params.cantItMax = 50;
+                /*** TSv5: TSv4 + TSv1 ***/
                 Solucion solMetah;
+                
+                // hallar sol de TSv4 como input para TSv1
                 String [] v = new String[params.nL];
                 solMetah = ejecucionUnitaria_v2_ret(params);
                 System.out.println("\nDONE v2 ( "+ solMetah.costo + " )");
 
+                // tomar matriz v de la sol de TSv4
                 for (int l = 0; l < params.nL; l++) {
                     v[l] = "";
                     for (int t = 0; t < params.nT; t++) {
@@ -265,17 +264,23 @@ public class TSSolver {
                         }
                     }
                 }
-                // params.cantItMax = 200;
+                
+                // ejecutar TSv1
                 ejecucionUnitaria(params, v, solMetah.r);
             }
         }
     }
     
+    /*** TSv2: 
+     * Fase de inicializacion: xs se calcula con WW segun demanda, delivery setup y stock de prod del cliente.
+     * Vecindario: swap r.
+     * Fase de generacion: xr = plan de remanuacturacion, xm = plan de manufacturacion.
+    ***/
     public static Solucion ejecucionUnitaria_v2(Parametros params) throws Exception {
         /*** Leer archivo DAT y configuracion ***/
         TabuSearch ts = new TabuSearch(params, params.version);
 
-        /*** Fase de inicializacion ***/
+        /*** Fase de inicializacion: sol factible ***/
         Solucion solOptima = new Solucion();
 
         // calcular xs
@@ -290,52 +295,22 @@ public class TSSolver {
         ts.calcularXU_v2(solOptima);
         solOptima.xu = ts.xu;
 
-        // ts.printMatriz(solOptima.IuL, "solOptima_IuL");
-
-        // System.out.println("TESTEO");
-        // if (ts.validarTasaRecoleccion(solOptima)) {
-        //     System.out.println("importante");
-        // }
-
         if (!ts.validarTasaRecoleccion(solOptima)) {
             for (int l = 0; l < params.nL; l++) {
                 if (solOptima.xs[l][params.nT-1] == 0) {
-                    // System.out.println("ACA");
                     solOptima.xu[l][params.nT-1] = params.U[l][params.nT-1];
 
                     solOptima.costoViaje += params.Kv[l][params.nT-1];
                     solOptima.costoStockUL -= params.U[l][params.nT-1] * params.huL[l][params.nT-1];
-                    
                 }
             }
-
         }
-
 
         solOptima.costoEntrega = costoXS + solOptima.costoTransportarU + solOptima.costoStockUL + solOptima.costoViaje;
         solOptima.costo = solOptima.costoEntrega;
-        /* System.out.println("costo entrega = " + solOptima.costoEntrega);
-        System.out.println("\tcostoXS = " + costoXS);
-        System.out.println("\tsolOptima.costoTransportarU = " + solOptima.costoTransportarU);
-        System.out.println("\tsolOptima.costoStockUL = " + solOptima.costoStockUL);
-        System.out.println("\tsolOptima.costoViaje = " + solOptima.costoViaje); */
-        
-
-        // ts.printMatriz(solOptima.xs, "solInicial xs");
-        // ts.printMatriz(solOptima.xu, "solInicial xu");
-
-        
         
         String rInicial = "";
         for(int i = 0; i < params.nT; i ++) {
-            /*
-            if ((i % 2) == 0) {
-                rInicial += "0";
-            } else {
-                rInicial += "1";
-            }
-            */
-            
             if (i == (params.nT - 1)) {
                 rInicial += "1";
             }
@@ -344,66 +319,47 @@ public class TSSolver {
             }  
         }
 
-        // Se inicia el timer
+        // se inicia el timer
         double startTime = System.currentTimeMillis();
 
-        /*
-        if (!ts.validarTasaRecoleccion(solOptima)) {
-            // actualizar cantidad recoletada
-                for (int t = 0; t < params.nT; t++) {
-                    System.out.println("t = " + t);
-                    System.out.println("\tU = " + params.U[0][t]);
-                    if (solOptima.xs[0][t] > 0) {
-                        System.out.println("\t" + solOptima.xu[0][t]);
-                    }
-                }
-            
-
-            
-        };
-        */
-        
-
+        /*** Fase de exploracion: iterar por vecindarios y quedarse con la mejor sol ***/
         int cantItMax = params.cantItMax;
         Solucion solActual;
         int cantIt = 0;
         while (cantIt < cantItMax) {
-            // System.out.println("\n********************** ITERACION " + cantIt + " **********************");
-
             solActual = ts.TS(rInicial, solOptima);
             rInicial = solActual.r;
-            // System.out.println("TS.Solver solActual = " + solActual + " - r = " + rInicial);
 
             if (solOptima.costo == solOptima.costoEntrega || solOptima.costo >= solActual.costo) {
-                // System.out.println("EJ. Cambio sol--> solOptima.costo = " + solOptima.costo + "solActual.costo = " + solActual.costo);
+                // actualizar mejor sol
                 solOptima = solActual;
             }
 
             cantIt ++;
         }
-
-        // ts.printMatriz(solOptima.IuL, "\nsolOptima_IuL 2.");
         
+        // se finaliza el timer
         double endTime = (System.currentTimeMillis() - startTime);
         if (params.version == 2) {
             ts.printSolucion(solOptima, ModoPrint.VD__POR_PLAN);
             System.out.print("\nTIEMPO (ms): " + endTime);
         }
 
-        // ts.printMatriz(solOptima.IuL, "\nsolOptima_IuL 3.");
-
         ts.validarSolucion(solOptima);
 
         return solOptima;
     }
 
+    /*** TSv4: 
+     * Fase de inicializacion: xs se calcula con WW segun demanda, delivery setup, stock de prod y stock de retornos del cliente.
+     * Vecindario: swap r.
+     * Fase de generacion: xr = plan de remanuacturacion, xm = plan de manufacturacion.
+    ***/
     public static Solucion ejecucionUnitaria_v2_ret(Parametros params) throws Exception {
-        // version 2 considerando los costos de los retornos 
-        
         /*** Leer archivo DAT y configuracion ***/
         TabuSearch ts = new TabuSearch(params, params.version);
 
-        /*** Fase de inicializacion ***/
+        /*** Fase de inicializacion: sol factible ***/
         Solucion solOptima = new Solucion();
 
         // calcular xs
@@ -419,53 +375,37 @@ public class TSSolver {
         solOptima.xu = ts.xu;
         solOptima.costoEntrega = costoXS + solOptima.costoTransportarU + solOptima.costoStockUL + solOptima.costoViaje;
         solOptima.costo = solOptima.costoEntrega;
-
-        // ts.printMatriz(solOptima.xs, "solInicial xs");
-        // ts.printMatriz(solOptima.xu, "solInicial xu");
         
         String rInicial = "";
         for(int i = 0; i < params.nT; i ++) {
-            /*
-            if ((i % 2) == 0) {
-                rInicial += "0";
-            } else {
-                rInicial += "1";
-            }
-            if (i == (params.nT - 1)) {
-                rInicial += "1";
-            }
-            */
-            
             if (i == (params.nT - 1)) {
                 rInicial += "1";
             }
             else {
                 rInicial += "0";
             }
-              
         }
 
-        // Se inicia el timer
+        // se inicia el timer
         double startTime = System.currentTimeMillis();
 
+        /*** Fase de exploracion: iterar por vecindarios y quedarse con la mejor sol ***/
         int cantItMax = params.cantItMax;
         Solucion solActual;
         int cantIt = 0;
         while (cantIt < cantItMax) {
-            // System.out.println("\n********************** ITERACION " + cantIt + " **********************");
-
             solActual = ts.TS(rInicial, solOptima);
             rInicial = solActual.r;
-            // System.out.println("TS.Solver solActual = " + solActual + " - r = " + rInicial);
 
             if (solOptima.costo == solOptima.costoEntrega || solOptima.costo >= solActual.costo) {
-                // System.out.println("EJ. Cambio sol--> solOptima.costo = " + solOptima.costo + "solActual.costo = " + solActual.costo);
+                // actualizar mejor sol
                 solOptima = solActual;
             }
 
             cantIt ++;
         }
 
+        // se finaliza el timer
         double endTime = (System.currentTimeMillis() - startTime);
         if (params.version == 4) {
             ts.printSolucion(solOptima, ModoPrint.VD__POR_PLAN);
@@ -477,12 +417,16 @@ public class TSSolver {
         return solOptima;
     }
     
+    /*** TSv1: 
+     * Fase de inicializacion: v[l, 1] = v[l, nT-1] = v[l, nT] = 1, r[nT] = 1.
+     * Vecindario: swap v -> swap r.
+     * Fase de generacion: (xs, xu) = plan de delivery, xr = plan de remanuacturacion, xm = plan de manufacturacion.
+    ***/
     public static Solucion ejecucionUnitaria(Parametros params, String[] v_v2, String r_v2) throws Exception{
         /*** Leer archivo DAT y configuracion ***/
-
         TabuSearch ts = new TabuSearch(params, params.version);
 
-        /*** Fase de inicializacion ***/
+        /*** Fase de inicializacion: sol factible ***/
         String rInicial = "";
         String [] vInicial = new String[params.nL];
         String visitaCliente = "";
@@ -498,7 +442,6 @@ public class TSSolver {
         Arrays.fill(vInicial, visitaCliente);
         
         for(int i = 0; i < params.nT; i ++) {
-            //if (i == (params.nT - params.STU - 1)) {
             if (i == (params.nT - 1)) {
                 rInicial += "1";
             }
@@ -509,14 +452,14 @@ public class TSSolver {
 
         int cantItMax = params.cantItMax;
 
-        /*** Fase de generacion ***/
+        /*** Fase de generacion: en base a la tupla factible, se genera la primer sol ***/
         Solucion solOptima = new Solucion();
         solOptima.costo = -1;
 
         // Se inicia el timer
         double startTime = System.currentTimeMillis();
 
-        // set4ear input para v3
+        // setear input para v3
         if (params.version == 3 || params.version == 5) {
             vInicial = v_v2;
             rInicial = r_v2;
@@ -525,27 +468,24 @@ public class TSSolver {
         solOptima = ts.generarSolucion(vInicial, rInicial);
         ts.guardarListaTabu(vInicial, rInicial);
 
+        /*** Fase de exploracion: iterar por vecindarios y quedarse con la mejor sol ***/
         Solucion solActual;
         int cantIt = 0;
         int cantSaltos = 0;
         while (cantIt < cantItMax) {
-            // System.out.println("\n********************** ITERACION " + cantIt + " **********************");
-
-            // System.out.println("IT = " + cantIt + " - SALTO = " + cantSaltos);
-            // System.out.println("\tvInicial = " + vInicial[0] + vInicial[1] + vInicial[2]);
-            // System.out.println("\trInicial = " + rInicial);
             solActual = ts.TS(vInicial, rInicial);
             vInicial = solActual.v;
             rInicial = solActual.r;
 
             if (solOptima.costo == -1 || solOptima.costo >= solActual.costo) {
+                // actualizar mejor sol
                 solOptima = solActual;
             }
 
             cantIt ++;
 
+            /*** Post optimizacion: saltos ***/
             if (params.saltos == 1 && cantIt >= cantItMax && cantSaltos < params.saltosMAX) {
-                // System.out.println("\n********************** SALTOS " + cantSaltos + " **********************");
                 String rNeg = "";
                 String [] vNeg = new String[params.nL];
 
@@ -554,21 +494,13 @@ public class TSSolver {
 
                     vNeg[l] += '1';
                     for (int i = 1; i < (params.nT-1); i++) {
-                        /*if (solActual.v[l].charAt(i) == '0') {
-                            vNeg[l] += '1';
-                        } else {
-                            vNeg[l] += '0';
-                        }*/
                         vNeg[l] += solActual.v[l].charAt(i);
-
                     }
                     vNeg[l] += '1';
-                    // System.out.println("Entro con v = " + solActual.v[l] + " - salgo con vNeg = " + vNeg[l]);
                 }
 
                 rNeg = "";
                 for (int i = 0; i < (params.nT-1); i++) {
-                    //if (solOptima.r.charAt(i) == '0') {
                     if (params.saltos_swap_odd == 1) {
                         if (i % 2 != 0) {
                             rNeg += '1';
@@ -584,31 +516,26 @@ public class TSSolver {
                     }
                 }
                 rNeg += '1';
-                // System.out.println("Entro con r = " + solOptima.r + " - salgo con rNeg = " + rNeg);
 
                 vInicial = vNeg;
                 rInicial = rNeg;
 
                 cantSaltos ++;
                 cantIt = 0;
-                
             }
-            
         }
 
+        // se finaliza el timer
         double endTime = (System.currentTimeMillis() - startTime);
-
         ts.printSolucion(solOptima, ModoPrint.VD__POR_PLAN);
         System.out.print("\nTIEMPO (ms): " + endTime);
 
         ts.validarTasaRemanu(solOptima);
 
         return solOptima;
-
     }
     
     public static void main(String[] args) {
-        System.out.println("main");
         try {
             masterEjecucion();
         } catch (Exception e) {

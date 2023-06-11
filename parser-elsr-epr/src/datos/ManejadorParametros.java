@@ -12,6 +12,10 @@ import logica.Parametros;
 import logica.TSExcepcion;
 
 public class ManejadorParametros {
+    /*****************
+        Contiene la logica para manejar los parametros del problema
+
+    *****************/
     
     /*** ATRIBUTOS ***/
     public Parametros params;
@@ -60,7 +64,6 @@ public class ManejadorParametros {
             System.out.println("Error = " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     /*** METODOS ***/
@@ -72,7 +75,7 @@ public class ManejadorParametros {
         largo = linea.length();
         linea = linea.substring(0, largo-1);
 
-        //divido los valores
+        // divido los valores
         String [] arrStrValores = linea.split("=");
         int nT = Integer.parseInt(arrStrValores[1].trim());
         if (nT != valor) {
@@ -80,7 +83,6 @@ public class ManejadorParametros {
         }
     }
 
-    // Calcular int
     private int calcularInt(String linea) {
         int largo;
 
@@ -105,7 +107,6 @@ public class ManejadorParametros {
         return(Float.parseFloat(arrStrValores[1].trim()));
     }
 
-    // Calcular int[]
     private int[] calcularArrayInt(String linea, int arrLen) {
         int[] arrValores = new int[arrLen];
         int largo;
@@ -124,12 +125,9 @@ public class ManejadorParametros {
         return arrValores;
     }
 
-    // Calcular int[]
     private float[] calcularArrayFloat(String linea, int arrLen) {
         float[] arrValores = new float[arrLen];
         int largo;
-
-        // System.out.println(linea);
 
         // elimino punto y coma
         largo = linea.length();
@@ -145,7 +143,6 @@ public class ManejadorParametros {
         return arrValores;
     }
 
-    // Calcular int[][]
     private int[] calcularMatrizFila(String linea, int arrLen) {
         int largo;
         int[] arrValores = new int[arrLen];
@@ -186,7 +183,6 @@ public class ManejadorParametros {
         return arrValores;
     }
 
-    // Calcular int[][]
     private float[] calcularMatrizFilaFloat(String linea, int arrLen) {
         int largo;
         float[] arrValores = new float[arrLen];
@@ -250,8 +246,6 @@ public class ManejadorParametros {
                     params.setKvFila(clienteIt, calcularMatrizFila(valorCliente, params.nT));
                 }
                 if (linea.contains("hsL")) {
-                    // params.setHsLFila(clienteIt, calcularMatrizFila(valorCliente, params.nT));
-
                     if (params.huL_pond > 0) {
                         params.setHsLFila(clienteIt, calcularMatrizFilaPond(valorCliente, params.nT, params.huL_pond));
                     } else {
@@ -264,14 +258,13 @@ public class ManejadorParametros {
                     } else {
                         params.setHuLFila(clienteIt, calcularMatrizFilaFloat(valorCliente, params.nT));
                     }
-                    
                 }
                 clienteIt ++;
             }
         }
-
     }
 
+    /*** Lectura del archivo que contiene los parametros del problema ***/
     public Parametros leerArchivo() throws TSExcepcion {
         String archivo = params.datArchivo;
         System.out.println(archivo);
@@ -288,8 +281,6 @@ public class ManejadorParametros {
 
             linea = bufferedReader.readLine();
             while(linea != null) {
-                // System.out.println(linea);
-
                 // Validar valores que viene del properties
                 if (linea.contains("param nT")) {
                     validarNT_L(linea, params.nT, 3);
@@ -351,7 +342,6 @@ public class ManejadorParametros {
                             linea = bufferedReader.readLine();
                             lineaMatriz += linea + "-";
                         }
-                        // System.out.println("lineaMatriz = " + lineaMatriz);
                         calcularMatrices(lineaMatriz);
 
                         lineaMatriz = "";
@@ -360,8 +350,6 @@ public class ManejadorParametros {
 
                 linea = bufferedReader.readLine();
             }
-
-            // imprimirParametros();
 
             // Always close files.
             bufferedReader.close();

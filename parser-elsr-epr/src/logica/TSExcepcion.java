@@ -1,6 +1,10 @@
 package logica;
 
 public class TSExcepcion extends Exception {
+    /*****************
+        Generacion de errores del algoritmo para su manejo
+
+    *****************/
 
     private int codigoError;
     private String nomArchivo;

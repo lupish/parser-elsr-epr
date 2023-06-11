@@ -5,7 +5,9 @@ public class Parametros {
         Contiene los parametros del modelo
 
         Atributos de la clase:
-        - ...
+        - parametros del algoritmo: version, iteraciones, saltos.
+        - parametros del problema: cantidad de periodos y clientes, costos, tasas.
+        - variables de decision.
 
     *****************/
 
@@ -43,7 +45,6 @@ public class Parametros {
         hu = new float[nT];
         cvs = new int[nT];
         cvu = new int[nT];
-
     };
 
     public Parametros(
@@ -80,7 +81,6 @@ public class Parametros {
         // float
         this.alpha = alpha;
         this.beta = beta;
-
     }
 
     public void setCantPeriodos(int nT) {
@@ -221,6 +221,4 @@ public class Parametros {
             printArrayD(valor[i], "\t");
         }
     }
-
-
 }

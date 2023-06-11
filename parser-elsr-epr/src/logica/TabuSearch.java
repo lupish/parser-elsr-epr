@@ -8,6 +8,9 @@ public class TabuSearch {
         Contiene la logica de cada iteracion del Tabu Search
 
         Atributos de la clase:
+        - lista tabu.
+        - variables de decision.
+        - parametros del problema.
 
     *****************/
 
@@ -35,7 +38,7 @@ public class TabuSearch {
     public TabuSearch(Parametros params, int version) {
 
         // CircularFifoQueue<String>
-        listaTabu = new CircularFifoQueue<String>(params.tamListaTabu); // VER EL OBJETIVO QUE LE PASO!
+        listaTabu = new CircularFifoQueue<String>(params.tamListaTabu);
         this.params = params;
 
         this.cantSolAnalizadas = 0;
@@ -45,7 +48,6 @@ public class TabuSearch {
         if (version >= 2) {
             this.xs = new int[params.nL][params.nT];
             this.xu = new int[params.nL][params.nT];
-            // this.IuL = new int[params.nL][params.nT];
         }
     }
 
@@ -136,41 +138,20 @@ public class TabuSearch {
                 // Costo variable por transportar retornos
                 costoTransportarU += xu[l][j] * params.cvu[l];
 
-                // Stock
-                /*if (j == 0) {
-                    s.IuL[l][j] = params.U[l][j] - xu[l][j];
-                } else {
-                    s.IuL[l][j] = s.IuL[l][j-1] + params.U[l][j] - xu[l][j];
-
-                    if (j == 4 && s.IuL[l][j] < 0) {
-                        System.out.println("s.IuL[" + l +"][" + j + "] < 0");
-                        System.out.println("s.IuL[l][j-1] = " + s.IuL[l][j-1]);
-                        System.out.println("params.U[l][j] = " + params.U[l][j]);
-                        System.out.println("xu[l][j] = " + xu[l][j]);
-                    }
-                }*/
                 Iu[j] += xu[l][j];
 
                 // Costo variable por stock de prod finales
                 costoStockUL += s.IuL[l][j] * params.huL[l][j];
             }
         }
-
-        // printMatriz(IuL, "sol_IsU");
     }
 
     public void calcularXU_v2(Solucion s) {
         int uL, i, stockL, costoViajeU;
         boolean condRecol;
-
-        // System.out.println("*** calcularXU_v2 ***");
-        // printMatriz(s.xs, "xs");
-
         costoTransportarU = 0;
         costoStockUL = 0;
         costoViajeU = 0;
-        
-
         Iu = new int[params.nT];
         s.Iu = Iu;
         IuL = new int[params.nL][params.nT];
@@ -212,7 +193,6 @@ public class TabuSearch {
                             condRecol = false;
                         }
                     }
-                    // System.out.println("s.IuL[" + l + "][" + j + "] = " + stockL);
                     s.IuL[l][j] = stockL;
                 }
                 
@@ -230,30 +210,13 @@ public class TabuSearch {
         
         s.costoTransportarU = costoTransportarU;
         s.costoStockUL = costoStockUL;
-        s.costoViaje = costoViajeU;
-
-        
-        
-        /*System.out.println("----> prints in calcularXU_v2");
-        System.out.println("s.costoTransportarU = " + s.costoTransportarU);
-        System.out.println("s.costoStockUL = " + s.costoStockUL);
-        System.out.println("s.costoViaje = " + s.costoViaje);
-        System.out.println("costoViajeU = " + costoViajeU);
-        printMatriz(s.IuL, "sol_IuL");
-        printArray(Iu, "sol_Iu");
-        printMatriz(xu, "sol_xu");*/
-        
-        
+        s.costoViaje = costoViajeU;   
     }
 
     public void calcularXU_v2_ret(Solucion s) {
-        int uL, i, stockL, costoCliente; //, costoViajeU;
+        int uL, i, stockL;
         float costoViajeU;
         boolean condRecol;
-
-        // System.out.println("*** calcularXU_v2_ret ***");
-        // printMatriz(s.xs, "xs");
-
         costoTransportarU = 0;
         costoViajeU = 0;
 
@@ -263,7 +226,6 @@ public class TabuSearch {
         s.IuL = IuL;
 
         for (int l = 0; l < params.nL; l ++) {
-            // System.out.println("------> CLIENTE l = " + l);
             // tasa de recoleccion 1: se debe recolectar en el penultimo periodo
             if (s.xs[l][params.nT-params.STU-1] == 0 && params.beta == 1) {
                 costoViajeU += params.Kv[l][params.nT-params.STU-1];
@@ -287,21 +249,13 @@ public class TabuSearch {
                     if (s.xs[l][j] == 0 && params.beta == 1 && j == (params.nT-params.STU-1)) {
                         i++;
                         
-                        /*
-                        System.out.println("se viaje en el ultimo retorno, se quitan los stockeos");
-                        System.out.println("\ti = " + i);
-                        System.out.println("\tj = " + j);
-                        System.out.println("\tcostoViajeU antes = " + costoViajeU);
-                        */
                         for(int w = i; w < (j+1); w++) {
                             // se viaje en el ultimo retorno, se quitan los stockeos dado q voy en el antepenultimo
-                            // System.out.println("\t\tw = " + w);
                             costoViajeU -= (params.huL[l][j] * params.U[l][w]);
                             if (s.xs[l][j+1] == 0) {
                                 costoViajeU -= (params.huL[l][j+1] * params.U[l][w]);
                             }
                         }
-                        // System.out.println("\tcostoViajeU desp = " + costoViajeU);
                     }
 
                     s.IuL[l][j] = 0;
@@ -320,67 +274,29 @@ public class TabuSearch {
                             condRecol = false;
                         }
                     }
-                    // System.out.println("s.IuL[" + l + "][" + j + "] = " + stockL);
                     s.IuL[l][j] = stockL;
                 }
                 
                 xu[l][j] = uL;
-
-                // Costo variable por transportar retornos
-                // costoTransportarU += xu[l][j] * params.cvu[l];
-
                 Iu[j] += xu[l][j];
-
-                // Costo variable por stock de prod finales
-                // costoStockUL += s.IuL[l][j] * params.huL[l][j];
-                // System.out.println("CLIENTE l = " + l + "<------");
             }
         }
 
         s.costoTransportarU = costoTransportarU;
         s.costoStockUL = costoStockUL;
         s.costoViaje = costoViajeU;
-
-        
-        /*
-        System.out.println("----> prints in calcularXU_v2_ret");
-        System.out.println("s.costoTransportarU = " + s.costoTransportarU);
-        System.out.println("s.costoStockUL = " + s.costoStockUL);
-        printMatriz(s.IuL, "sol_IuL");
-        printArray(Iu, "sol_Iu");
-        printMatriz(xu, "sol_xu");
-        */
-        
-        
     }
 
     public void calcularXR(String r, Solucion s) {
         int stock, prodFinalesLlevar, retornosL;
-
         costoR = 0;
         costoStockU = 0;
 
-        /*
-        System.out.println("*** calcularXR ***");
-        System.out.println("--> r = " + r);
-        printMatriz(s.xs, "s.xs");
-        printMatriz(s.xu, "s.xu");
-        */
-
-        /*for (int t = 0; t < params.nT; t++) {
-            System.out.print("Iu[t] = ");
-            System.out.println(Iu[t]); 
-        }*/
-
         for (int i = 0; i < params.nT; i++) {
-
             /*** Calcular cantidad a remanufacturar ***/
             if (r.charAt(i) == '1') {
                 if (i > (params.STU-1)) {
-                    stock = s.Iu[i - params.STU];
-
-                    // System.out.print("Iu[i - params.STU] = ");
-                    // System.out.println(Iu[i - params.STU]); 
+                    stock = s.Iu[i - params.STU]; 
                 } else {
                     stock = params.U_0;
                     for (int k = 0; k < i; k++) {
@@ -388,7 +304,6 @@ public class TabuSearch {
                     }
                 }
 
-                // xr[i] = Math.min(stock, demandas);
                 xr[i] = stock;
 
                 // Costo fijo por remanufacturar
@@ -406,14 +321,10 @@ public class TabuSearch {
                 retornosL += s.xu[l][i];
             }
             if (i == 0) {
-                // s.Iu[i] = s.Iu[i] + params.U_0 - xr[i] <-- antes;
                 s.Iu[i] = retornosL + params.U_0 - xr[i];
             } else {
-                // s.Iu[i] = s.Iu[i] + Iu[i-1] - xr[i];
                 s.Iu[i] = retornosL + Iu[i-1] - xr[i];
             }
-            //System.out.print("update Iu[i] = ");
-            //System.out.println(Iu[i]); 
 
             // Costo stock de retornos
             costoStockU += s.Iu[i] * params.hu[i];
@@ -432,9 +343,6 @@ public class TabuSearch {
 
             // Costo stock de prod finales se calcula luego de WW
         }
-
-        // printArray(s.Iu, "s.Iu");
-        // System.out.println("costoStockU = " + costoStockU);
     }
 
     public void calcularXM(String r, Solucion s) {
@@ -488,7 +396,7 @@ public class TabuSearch {
         s.IuL = IuL;
         IsL = new int[params.nL][params.nT];
         
-        /*** Plan de entrega ***/
+        /*** Plan de delivery ***/
         calcularXS(v);
         calcularXU(v, s);
         s.xs = xs;
@@ -499,7 +407,7 @@ public class TabuSearch {
         s.costoStockSL = costoStockSL;
         s.costoStockUL = costoStockUL;
         s.costoEntrega = costoViaje + costoTransportarS + costoTransportarU + costoStockSL + costoStockUL;
-        s.costo = s.costoEntrega; // += s.costoViaje + s.costoTransportarS + s.costoTransportarU + s.costoStockSL + s.costoStockUL;
+        s.costo = s.costoEntrega;
 
         /*** Plan de remanufacturacion ***/
         calcularXR(r, s);
@@ -508,16 +416,15 @@ public class TabuSearch {
         s.costoR = costoR;
         s.costoStockU = costoStockU;
         s.costoRemanu = costoR + costoStockU;
-        s.costo += s.costoRemanu; //s.costoR + s.costoStockU;
+        s.costo += s.costoRemanu;
 
         /*** Plan de manufacturacion ***/
         calcularXM(r, s);
         s.xm = xm;
         s.Is = Is;
         s.costoM = costoM;
-        // s.costoStockS = costoStockS;
         s.costoManu = s.costoM;
-        s.costo += s.costoManu; //s.costoM; // + s.costoStockS;
+        s.costo += s.costoManu;
 
         return s;
     }
@@ -540,14 +447,8 @@ public class TabuSearch {
         IuL = new int[params.nL][params.nT];
         s.IuL = IuL;
         IsL = new int[params.nL][params.nT];
-
-        // VEEER
-        // Is = new int[params.nT];
-        // s.Is = Is;
-        // IsL = new int[params.nL][params.nT];
-
         
-        /*** Plan de entrega ***/
+        /*** Plan de delivery ***/
         s.xs = solInicial.xs;
         s.xu = solInicial.xu;
         s.costoTransportarU = solInicial.costoTransportarU;
@@ -557,7 +458,6 @@ public class TabuSearch {
 
         /*** Plan de remanufacturacion ***/
         calcularXR(r, s);
-        // printArray(s.Iu, "generarSolucion. s.Iu");
         s.xr = xr;
         s.costoR = costoR;
         s.costoStockU = costoStockU;
@@ -588,18 +488,15 @@ public class TabuSearch {
     public void guardarListaTabu(String[] v, String r){
         // transformo la tupla en str
         String strTupla = convertirTuplaStr(v, r);
-        // System.out.println("strTira = " + strTupla);
 
         // guardo la tupla si no existe
         if (!listaTabu.contains(strTupla)) {
             listaTabu.add(strTupla);
         }
-
     }
 
     public String[] copiaLimpiaV(String[] v, int swapF, int swapC) {
-        /*** swapeo la tupla de visitas en la posicion ['swapF', 'swapC'] ***/
-
+        /*** Swapeo la tupla de visitas en la posicion ['swapF', 'swapC'] ***/
         String[] vLimpio = new String[params.nL];
         for(int f = 0; f < params.nL; f ++) {
             vLimpio[f] = "";
@@ -620,7 +517,7 @@ public class TabuSearch {
     }
 
     public String copiaLimpiaR(String r, int swap) {
-        /*** swapeo la tupla de remanufacturación en la posicion 'swap' ***/
+        /*** Swapeo la tupla de remanufacturación en la posicion 'swap' ***/
         String rLimpio = "";
         Character periodo_swap;
         if (r.charAt(swap) == '0') {
@@ -665,7 +562,6 @@ public class TabuSearch {
 
     public List hallarVecindario(String r) {
         List<String> vecinas = new ArrayList<String>();
-
         String rLimpio;
 
         for (int cR = 0; cR < params.nT; cR++) { // itero por periodos
@@ -674,10 +570,10 @@ public class TabuSearch {
             vecinas.add(rLimpio);
         }
 
-
         return vecinas;
     }
 
+    /*** Fase de exploracion para TSv1 ***/
     public Solucion TS(String[] v, String r) {
         String[] vActual;
         String rActual;
@@ -689,9 +585,6 @@ public class TabuSearch {
 
         // genero la solucion
         Solucion solActual = generarSolucion(v, r);
-        // VEEEEEEEEER
-        // solVecinaOptima = solActual;
-        // System.out.println("TS. solActual = " + solActual.costo);
 
         // guardo en la lista tabu
         guardarListaTabu(v, r);
@@ -711,28 +604,24 @@ public class TabuSearch {
                     if (solVecinaOptima.costo == -1 || solVecinaOptima.costo > solVecina.costo) {
                         solVecinaOptima = solVecina;
                     }
-                } else {
-                    // System.out.println("Solucion no factible");
                 }
-
-                /*if (solVecinaOptima.costo == -1 || solVecinaOptima.costo > solVecina.costo) {
-                    solVecinaOptima = solVecina;
-                }*/
             }
         }
 
+        // actualizo la lista tabu
         if (solVecinaOptima.strTira == null) {
             solVecinaOptima = solActual;
         } else {
             listaTabu.add(solVecinaOptima.strTira);
         }
+        
+        // devuevo la mejor solucion vecina
         return solVecinaOptima;
     }
 
+    /*** Fase de exploracion para TSv2 y TSv4 ***/
     public Solucion TS(String r, Solucion solInicial) {
         String rActual;
-
-        // System.out.println("--- TS r = " + r + "---");
 
         Solucion solVecina;
         Solucion solVecinaOptima = new Solucion();
@@ -741,7 +630,6 @@ public class TabuSearch {
 
         // genero la solucion
         Solucion solActual = generarSolucion(r, solInicial);
-        // printArray(solActual.Iu, "TS.1. s.Iu");
 
         // guardo en la lista tabu
         if (!listaTabu.contains(r)) {
@@ -752,48 +640,32 @@ public class TabuSearch {
         List<String> vecinas = hallarVecindario(r);
         for (int i = 0; i < vecinas.size(); i++) {
             rActual = vecinas.get(i);
-            // System.out.println("rActual = " + rActual);
 
             if (!listaTabu.contains(rActual)) {
                 solVecina = generarSolucion(rActual, solActual);
-                // System.out.println("solVecina.costo = " + solVecina.costo + "- r = " + rActual);
-                
-                /*if (solVecinaOptima.costo == solInicial.costoEntrega || solVecinaOptima.costo > solVecina.costo) {
-                    solVecinaOptima = solVecina;
-                }*/
 
                 if (validarFactibilidad(solVecina)) {
                     // solucion factible
                     if (solVecinaOptima.costo == solInicial.costoEntrega || solVecinaOptima.costo > solVecina.costo) {
                         solVecinaOptima = solVecina;
                     }
-                } else {
-                    // System.out.println("Solucion no factible");
                 }
             }
         }
 
-        // System.out.println("solVecinaOptima.strTira = " + solVecinaOptima.strTira + " - r = " + solVecinaOptima.r);
+        // actualizo la lista tabu
         if (solVecinaOptima.strTira == null) {
             solVecinaOptima = solActual;
         } else {
             listaTabu.add(solVecinaOptima.strTira);
         }
 
-        // System.out.println("TS. solVecinaOptima.costo = "+ solVecinaOptima.costo);
+        // devuevo la mejor solucion vecina
         return solVecinaOptima;
     }
 
     public boolean validarFactibilidad(Solucion s) {
-        //System.out.println("\nvalidarTasaRecoleccion = " + validarTasaRecoleccion(s));
-        //System.out.println("validarTasaRemanu = " + validarTasaRemanu(s));
-        //System.out.println("validarDemandaCliente = " + validarDemandaCliente(s));
-
         return (validarTasaRecoleccion(s) && validarTasaRemanu(s) && validarDemandaCliente(s));
-        
-        // alpha = 0
-        // recorro vecindario asegurando tasa de recol
-        //return validarDemandaCliente(s);
     }
 
     public boolean validarTasaRecoleccion(Solucion s) {
@@ -807,13 +679,10 @@ public class TabuSearch {
             }
         }
 
-        // System.out.println("cant_recolectada = " + cant_recolectada + " - cant_retornos*b = " + (params.beta * cant_retornos));
         return (cant_recolectada >= (params.beta * cant_retornos));
-
     }
 
     public boolean validarDemandaCliente(Solucion s) {
-        
         for (int l = 0; l < params.nL; l++) {
             for (int t = 0; t < params.nT; t++) {
                 if (IsL[l][t] < 0) {
@@ -839,7 +708,6 @@ public class TabuSearch {
         }
 
         return (cant_remanu >= (params.alpha * cant_retornos_recol));
-
     }
 
     public boolean validarTasaRemanuPRINT(Solucion s) {
@@ -863,7 +731,6 @@ public class TabuSearch {
         System.out.println(params.alpha * cant_retornos_recol);
 
         return (cant_remanu >= (params.alpha * cant_retornos_recol));
-
     }
 
     public boolean validarSolucion(Solucion s) throws TSExcepcion {
@@ -873,8 +740,6 @@ public class TabuSearch {
         float costoEntrega = 0, costoViaje = 0, costoTransportarS = 0, costoTransportarU = 0, costoStockSL = 0, costoStockUL = 0;
         float costoRemanu = 0, costoR = 0, costoStockU = 0;
         float costoManu = 0;
-
-        // printMatriz(s.IuL, "\nsolOptima_IuL INSIDE.");
 
         // validar factibilidad
         if (!validarFactibilidad(s)) {
@@ -928,11 +793,6 @@ public class TabuSearch {
                     sol_ok = false;
                     System.out.println("Fail 2");
                 }
-
-                /*if ((s.xs[c][t] + s.xu[c][t]) > 0 && s.yv[c][t]) {
-                    error_desc += "\n\terror de activacion de yv[" + c +"][" + t + "]";
-                    sol_ok = false;
-                }*/
             }
 
             // costos
@@ -960,17 +820,6 @@ public class TabuSearch {
                 sol_ok = false;
                 System.out.println("Fail 4");
             }
-
-            /*if (s.xm[t] > 0 && s.ym[t]) {
-                error_desc += "\n\tactivacion de ym[" + t + "]";
-                sol_ok = false;
-            }
-
-            if (s.xr[t] > 0 && s.yr[t]) {
-                error_desc += "\n\terror de activacion de yr[" + t + "]";
-                sol_ok = false;
-            }*/
-
         }
 
         // costos
@@ -981,7 +830,7 @@ public class TabuSearch {
         if ((int)(s.costo) != (int)(costoTotal) && Math.round(s.costo) != Math.round(costoTotal)) {
             error_desc += "\n\tcosto de la solucion (" + s.costo + ") no coincide con el de la validacion (" + costoTotal + ")";
             
-            // Plan de entrega
+            // Plan de delivery
             error_desc += "\n\t\tsol_costoEntrega = " + s.costoEntrega + " vs val_costoEntrega = " + costoEntrega;
             error_desc += "\n\t\t\tsol_costoViaje = " + s.costoViaje + " vs val_costoViaje = " + costoViaje;
             error_desc += "\n\t\t\tsol_costoTransportarS = " + s.costoTransportarS + " vs val_costoTransportarS = " + costoTransportarS;

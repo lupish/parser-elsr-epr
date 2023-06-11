@@ -31,9 +31,9 @@ public class WagnerWhitin {
     /*** CONSTRUCTOR ***/
     public WagnerWhitin(Parametros params) {
         this.params = params;
-
     }
 
+    /*** Logica de WW para calcular xs en TSv4  ***/
     public WagnerWhitin(Parametros params, int l) {
         this.params = params;
         this.l = l;
@@ -44,9 +44,9 @@ public class WagnerWhitin {
         Arrays.fill(this.iS, 0);
 
         this.nivelLogger = "PROD";
-
     }
 
+    /*** Logica de WW para calcular xm  ***/
     public WagnerWhitin(int cantPeriodos ,int cantClientes,int [] econSetupManu
                         ,int [] econStockProdFinal, int [][] demandaL, int [] iS
                         ,int [] econManu, int[][] xs, int [] xr
@@ -54,14 +54,11 @@ public class WagnerWhitin {
         this.n = cantPeriodos;
         this.kM = econSetupManu;
         this.hS = econStockProdFinal;
-        // this.cm = econManu;
 
-        // System.out.println("****** WagnerWhitin ******");
         d = new int[cantPeriodos];
         for (int i = 0 ; i < cantPeriodos; i++) {
             d[i] = 0;
             for (int l = 0 ; l < cantClientes; l++) {
-                //d[i] += demandaL[l][i];
                 d[i] += xs[l][i];
             }
             if (d[i] > xr[i]) {
@@ -75,16 +72,15 @@ public class WagnerWhitin {
         this.nivelLogger = nivelLogger;
 
         xM = new int[n];
-
     }
 
+    /*** Logica de WW para calcular xs en TSv2  ***/
     public WagnerWhitin(int cantPeriodos ,int cantClientes,int [] econSetupManu
                         ,int [] econStockProdFinal, int [] demandaL
                         ,int [] econManu) {
         this.n = cantPeriodos;
         this.kM = econSetupManu;
         this.hS = econStockProdFinal;
-        // this.cm = econManu;
 
         d = demandaL;
 
@@ -356,5 +352,4 @@ public class WagnerWhitin {
             System.out.println("\n***********************************");
         }
     }
-
 }
