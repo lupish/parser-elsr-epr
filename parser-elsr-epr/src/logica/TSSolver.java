@@ -143,7 +143,9 @@ public class TSSolver {
     
     public static void masterEjecucion() throws Exception {
         /*** Leer archivo DAT y configuracion ***/
+        System.out.println("to new ManejadorParametros()");
         ManejadorParametros mp = new ManejadorParametros();
+        System.out.println("to mp.leerArchivo");
         Parametros params = mp.leerArchivo();
 
         if (params.esMasivo == 1) {
@@ -606,6 +608,7 @@ public class TSSolver {
     }
     
     public static void main(String[] args) {
+        System.out.println("main");
         try {
             masterEjecucion();
         } catch (Exception e) {

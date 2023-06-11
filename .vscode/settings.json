@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\proy_io\\Codigo\\JARs\\commons-collections4-4.1.jar"
+    ]
+}

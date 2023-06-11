@@ -21,7 +21,7 @@ public class ManejadorParametros {
         InputStream configInput;
         Properties config = new Properties();
 
-        String paramRoot = System.getProperty("user.dir") + "\\src\\datos\\paramModelo.properties";
+        String paramRoot = System.getProperty("user.dir") + "\\parser-elsr-epr\\src\\datos\\paramModelo.properties";
         System.out.println(paramRoot);
         try {
             configInput = new FileInputStream(paramRoot);
